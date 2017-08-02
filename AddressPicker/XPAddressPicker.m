@@ -57,6 +57,10 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
+        UIUserInterfaceIdiom idiom = UI_USER_INTERFACE_IDIOM();
+        if (idiom != UIUserInterfaceIdiomPad && idiom != UIUserInterfaceIdiomPhone) {
+            NSAssert(NO, @"Only supports iPhone and iPad");
+        }
         [self standardInitialization];
     }
     return self;
