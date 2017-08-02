@@ -20,6 +20,20 @@
 
 ![GIF](./demo.gif)
 
+## XPAddressPickerStyle
+
+- XPAddressPickerStyleDefault
+
+![](./XPAddressPickerStyleDefault.png)
+
+- XPAddressPickerStyleSingle
+
+![](./XPAddressPickerStyleSingle.png)
+
+- XPAddressPickerStyleDouble
+
+![](./XPAddressPickerStyleDouble.png)
+
 ## License
 
 基于MIT License进行开源，详细内容请参阅`LICENSE`文件。
