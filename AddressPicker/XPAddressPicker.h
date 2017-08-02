@@ -2,12 +2,20 @@
 //  XPAddressPicker.h
 //  AddressPicker
 //
-//  Created by nhope on 2017/7/27.
+//  https://github.com/xiaopin/AddressPickerDemo
 //
 
 #import <UIKit/UIKit.h>
 
 @class XPAddressPicker;
+
+
+typedef NS_ENUM(NSInteger, XPAddressPickerStyle) {
+    XPAddressPickerStyleDefault     = 0, // 默认,显示完整的省/市/区
+    XPAddressPickerStyleSingle      = 1, // 仅仅显示省
+    XPAddressPickerStyleDouble      = 2  // 显示省/市
+};
+
 
 @protocol XPAddressPickerDelegate <NSObject, UIImagePickerControllerDelegate>
 
@@ -23,6 +31,7 @@
 @interface XPAddressPicker : UIView
 
 @property (nonatomic, weak) id<XPAddressPickerDelegate> delegate;
+@property (nonatomic, assign) XPAddressPickerStyle pickerStyle; // default `XPAddressPickerStyleDefault`
 
 /**
  显示Picker

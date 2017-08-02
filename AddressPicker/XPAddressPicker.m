@@ -2,7 +2,7 @@
 //  XPAddressPicker.m
 //  AddressPicker
 //
-//  Created by nhope on 2017/7/27.
+//  https://github.com/xiaopin/AddressPickerDemo
 //
 
 #import "XPAddressPicker.h"
@@ -78,7 +78,20 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
 #pragma mark <UIPickerViewDataSource>
 
 - (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView {
-    return 3;
+    NSInteger number = 0;
+    switch (_pickerStyle) {
+        case XPAddressPickerStyleSingle:
+            number = 1;
+            break;
+        case XPAddressPickerStyleDouble:
+            number = 2;
+            break;
+        case XPAddressPickerStyleDefault:
+        default:
+            number = 3;
+            break;
+    }
+    return number;
 }
 
 - (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component {
@@ -139,21 +152,41 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
 }
 
 - (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
-    if (component == 0) {
-        _provinceIndex = row;
-        _cityIndex = 0;
-        _countyIndex = 0;
-        [pickerView selectRow:0 inComponent:1 animated:NO];
-        [pickerView selectRow:0 inComponent:2 animated:NO];
-        [pickerView reloadComponent:1];
-        [pickerView reloadComponent:2];
-    } else if (component == 1) {
-        _cityIndex = row;
-        _countyIndex = 0;
-        [pickerView selectRow:0 inComponent:2 animated:NO];
-        [pickerView reloadComponent:2];
-    } else if (component == 2) {
-        _countyIndex = row;
+    switch (_pickerStyle) {
+        case XPAddressPickerStyleSingle:
+            _provinceIndex = row;
+            break;
+        case XPAddressPickerStyleDouble: {
+            if (component == 0) {
+                _provinceIndex = row;
+                _cityIndex = 0;
+                [pickerView selectRow:0 inComponent:1 animated:NO];
+                [pickerView reloadComponent:1];
+            } else if (component == 1) {
+                _cityIndex = row;
+            }
+        }
+            break;
+        case XPAddressPickerStyleDefault:
+        default: {
+            if (component == 0) {
+                _provinceIndex = row;
+                _cityIndex = 0;
+                _countyIndex = 0;
+                [pickerView selectRow:0 inComponent:1 animated:NO];
+                [pickerView selectRow:0 inComponent:2 animated:NO];
+                [pickerView reloadComponent:1];
+                [pickerView reloadComponent:2];
+            } else if (component == 1) {
+                _cityIndex = row;
+                _countyIndex = 0;
+                [pickerView selectRow:0 inComponent:2 animated:NO];
+                [pickerView reloadComponent:2];
+            } else if (component == 2) {
+                _countyIndex = row;
+            }
+        }
+            break;
     }
 }
 
@@ -176,25 +209,28 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
         NSMutableDictionary *result = [NSMutableDictionary dictionary];
         NSDictionary *province = [self.addressMaps objectAtIndex:_provinceIndex];
         NSDictionary *city = [(NSArray *)province[XPAddressPickerCityKey] objectAtIndex:_cityIndex];
-        NSArray *counties = (NSArray *)city[XPAddressPickerCountyKey];
         
         [result setObject:@{
                             XPAddressPickerIdKey: province[XPAddressPickerIdKey],
                             XPAddressPickerNameKey: province[XPAddressPickerNameKey]
                             }
                    forKey:XPAddressPickerProvinceKey];
-        [result setObject:@{
-                            XPAddressPickerIdKey: city[XPAddressPickerIdKey],
-                            XPAddressPickerNameKey: city[XPAddressPickerNameKey]
-                            }
-                   forKey:XPAddressPickerCityKey];
-        if (counties.count) {
-            NSDictionary *county = [counties objectAtIndex:_countyIndex];
+        if (_pickerStyle != XPAddressPickerStyleSingle) {
             [result setObject:@{
-                                XPAddressPickerIdKey: county[XPAddressPickerIdKey],
-                                XPAddressPickerNameKey: county[XPAddressPickerNameKey]
+                                XPAddressPickerIdKey: city[XPAddressPickerIdKey],
+                                XPAddressPickerNameKey: city[XPAddressPickerNameKey]
                                 }
-                       forKey:XPAddressPickerCountyKey];
+                       forKey:XPAddressPickerCityKey];
+            
+            NSArray *counties = (NSArray *)city[XPAddressPickerCountyKey];
+            if (counties.count && _pickerStyle == XPAddressPickerStyleDefault) {
+                NSDictionary *county = [counties objectAtIndex:_countyIndex];
+                [result setObject:@{
+                                    XPAddressPickerIdKey: county[XPAddressPickerIdKey],
+                                    XPAddressPickerNameKey: county[XPAddressPickerNameKey]
+                                    }
+                           forKey:XPAddressPickerCountyKey];
+            }
         }
         [self.delegate addressPicker:self didFinishPickingAddress:result];
     }
