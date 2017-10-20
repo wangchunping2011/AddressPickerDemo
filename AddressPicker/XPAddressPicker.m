@@ -7,6 +7,10 @@
 
 #import "XPAddressPicker.h"
 
+#define iPhoneX ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone \
+    && MIN(CGRectGetWidth([UIScreen mainScreen].bounds), CGRectGetHeight([UIScreen mainScreen].bounds)) == 375.0 \
+    && MAX(CGRectGetWidth([UIScreen mainScreen].bounds), CGRectGetHeight([UIScreen mainScreen].bounds)) == 812.0 \
+    )
 /// Picker视图的高度
 #define kPickerHeight (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 389.0 : 249.0)
 
@@ -249,7 +253,7 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
     [UIView animateWithDuration:0.01 animations:^{
         // do nothing.
     } completion:^(BOOL finished) {
-        self.containerBottomLayout.constant = 0.0;
+        self.containerBottomLayout.constant = iPhoneX ? -34.0 : 0.0;
         [UIView animateWithDuration:kAnimationDuration animations:^{
             [self layoutIfNeeded];
         }];
