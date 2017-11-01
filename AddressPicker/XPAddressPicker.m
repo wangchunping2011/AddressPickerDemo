@@ -11,8 +11,9 @@
     && MIN(CGRectGetWidth([UIScreen mainScreen].bounds), CGRectGetHeight([UIScreen mainScreen].bounds)) == 375.0 \
     && MAX(CGRectGetWidth([UIScreen mainScreen].bounds), CGRectGetHeight([UIScreen mainScreen].bounds)) == 812.0 \
     )
+#define kBottomBlank (iPhoneX ? 34.0 : 0.0)
 /// Picker视图的高度
-#define kPickerHeight (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 389.0 : 249.0)
+#define kPickerHeight (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 389.0 : 249.0+kBottomBlank)
 
 
 NSString * const XPAddressPickerProvinceKey     =   @"province";
@@ -31,6 +32,8 @@ NSString * const XPAddressPickerNameKey         =   @"name";
 @property (nonatomic, strong) UIView *containerView;
 /// Picker视图
 @property (nonatomic, strong) UIPickerView *pickerView;
+/// 顶部工具条
+@property (nonatomic, strong) UIView *toolbar;
 /// 取消按钮
 @property (nonatomic, strong) UIButton *cancelButton;
 /// 完成按钮
@@ -253,7 +256,7 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
     [UIView animateWithDuration:0.01 animations:^{
         // do nothing.
     } completion:^(BOOL finished) {
-        self.containerBottomLayout.constant = iPhoneX ? -34.0 : 0.0;
+        self.containerBottomLayout.constant = 0.0;
         [UIView animateWithDuration:kAnimationDuration animations:^{
             [self layoutIfNeeded];
         }];
@@ -328,12 +331,14 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
     self.backgroundColor = nil;
     [self addSubview:self.backgroundCloseButton];
     [self addSubview:self.containerView];
-    [self.containerView addSubview:self.cancelButton];
-    [self.containerView addSubview:self.doneButton];
+    [self.containerView addSubview:self.toolbar];
     [self.containerView addSubview:self.pickerView];
+    [self.toolbar addSubview:self.cancelButton];
+    [self.toolbar addSubview:self.doneButton];
     
     self.backgroundCloseButton.translatesAutoresizingMaskIntoConstraints = NO;
     self.containerView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.toolbar.translatesAutoresizingMaskIntoConstraints = NO;
     self.cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
     self.doneButton.translatesAutoresizingMaskIntoConstraints = NO;
     self.pickerView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -347,13 +352,18 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
     [self addConstraint:_containerBottomLayout];
     
     NSMutableArray<NSLayoutConstraint *> *constraints = [NSMutableArray array];
-    [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_cancelButton]" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_cancelButton)]];
-    [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_cancelButton(==30.0)]" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_cancelButton)]];
-    [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[_doneButton]-|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_doneButton)]];
-    [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_doneButton(==30.0)]" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_doneButton)]];
+    [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_toolbar]|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_toolbar)]];
+    [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_toolbar(==34.0)]" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_toolbar)]];
     [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_pickerView]|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_pickerView)]];
-    [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[_cancelButton]-0-[_pickerView]|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_cancelButton, _pickerView)]];
+    [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[_cancelButton]-0-[_pickerView]-blank-|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:@{@"blank":@(kBottomBlank)} views:NSDictionaryOfVariableBindings(_cancelButton, _pickerView)]];
     [self.containerView addConstraints:constraints];
+    
+    NSMutableArray<NSLayoutConstraint *> *toolbarConstraints = [NSMutableArray array];
+    [toolbarConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_cancelButton]" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_cancelButton)]];
+    [toolbarConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_cancelButton]|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_cancelButton)]];
+    [toolbarConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[_doneButton]-|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_doneButton)]];
+    [toolbarConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_doneButton]|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_doneButton)]];
+    [self.toolbar addConstraints:toolbarConstraints];
 }
 
 #pragma mark setter & getter
@@ -385,9 +395,17 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
 - (UIView *)containerView {
     if (nil == _containerView) {
         _containerView = [[UIView alloc] init];
-        _containerView.backgroundColor = [UIColor whiteColor];
+        _containerView.backgroundColor = [UIColor colorWithRed:241/255.0 green:241/255.0 blue:241/255.0 alpha:1.0];
     }
     return _containerView;
+}
+
+- (UIView *)toolbar {
+    if (nil == _toolbar) {
+        _toolbar = [[UIView alloc] init];
+        _toolbar.backgroundColor = [UIColor whiteColor];
+    }
+    return _toolbar;
 }
 
 - (UIButton *)cancelButton {
@@ -413,7 +431,7 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
 - (UIPickerView *)pickerView {
     if (nil == _pickerView) {
         _pickerView = [[UIPickerView alloc] init];
-        _pickerView.backgroundColor = [UIColor colorWithRed:241/255.0 green:241/255.0 blue:241/255.0 alpha:1.0];
+        _pickerView.backgroundColor = [UIColor clearColor];
         _pickerView.showsSelectionIndicator = YES;
         _pickerView.dataSource = self;
         _pickerView.delegate = self;
@@ -428,6 +446,7 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
         NSString *filepath = [[NSBundle mainBundle] pathForResource:@"Address.json" ofType:nil];
         NSData *data = [[NSData alloc] initWithContentsOfFile:filepath];
         _addressMaps = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
+        NSAssert(_addressMaps != nil, @"Address data failed to load.");
     }
     return _addressMaps;
 }
