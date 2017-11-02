@@ -355,7 +355,7 @@ static NSTimeInterval const kAnimationDuration  =   0.25;
     [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_toolbar]|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_toolbar)]];
     [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_toolbar(==34.0)]" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_toolbar)]];
     [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_pickerView]|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(_pickerView)]];
-    [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[_cancelButton]-0-[_pickerView]-blank-|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:@{@"blank":@(kBottomBlank)} views:NSDictionaryOfVariableBindings(_cancelButton, _pickerView)]];
+    [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[_toolbar]-0-[_pickerView]-blank-|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:@{@"blank":@(kBottomBlank)} views:NSDictionaryOfVariableBindings(_toolbar, _pickerView)]];
     [self.containerView addConstraints:constraints];
     
     NSMutableArray<NSLayoutConstraint *> *toolbarConstraints = [NSMutableArray array];
